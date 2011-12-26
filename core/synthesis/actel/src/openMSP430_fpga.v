@@ -47,7 +47,7 @@ module openMSP430_fpga (
     irq_acc,                      // Interrupt request accepted (one-hot signal)
     per_addr,                     // Peripheral address
     per_din,                      // Peripheral data input
-    per_wen,                      // Peripheral write enable (high active)
+    per_we,                       // Peripheral write enable (high active)
     per_en,                       // Peripheral enable (high active)
     smclk_en,                     // SMCLK enable
 
@@ -69,7 +69,7 @@ output              dbg_uart_txd; // Debug interface: UART TXD
 output       [13:0] irq_acc;      // Interrupt request accepted (one-hot signal)
 output        [7:0] per_addr;     // Peripheral address
 output       [15:0] per_din;      // Peripheral data input
-output        [1:0] per_wen;      // Peripheral write enable (high active)
+output        [1:0] per_we;       // Peripheral write enable (high active)
 output              per_en;       // Peripheral enable (high active)
 output              smclk_en;     // SMCLK enable
 
@@ -134,7 +134,7 @@ openMSP430 openMSP430_0 (
     .mclk         (mclk),         // Main system clock
     .per_addr     (per_addr),     // Peripheral address
     .per_din      (per_din),      // Peripheral data input
-    .per_wen      (per_wen),      // Peripheral write enable (high active)
+    .per_we       (per_we),       // Peripheral write enable (high active)
     .per_en       (per_en),       // Peripheral enable (high active)
     .pmem_addr    (pmem_addr),    // Program Memory address
     .pmem_cen     (pmem_cen),     // Program Memory chip enable (low active)

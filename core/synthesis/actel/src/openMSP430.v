@@ -52,7 +52,7 @@ module  openMSP430 (
     mclk,                          // Main system clock
     per_addr,                      // Peripheral address
     per_din,                       // Peripheral data input
-    per_wen,                       // Peripheral write enable (high active)
+    per_we,                        // Peripheral write enable (high active)
     per_en,                        // Peripheral enable (high active)
     pmem_addr,                     // Program Memory address
     pmem_cen,                      // Program Memory chip enable (low active)
@@ -86,7 +86,7 @@ output        [13:0] irq_acc;      // Interrupt request accepted (one-hot signal
 output               mclk;         // Main system clock
 output         [7:0] per_addr;     // Peripheral address
 output        [15:0] per_din;      // Peripheral data input
-output         [1:0] per_wen;      // Peripheral write enable (high active)
+output         [1:0] per_we;       // Peripheral write enable (high active)
 output               per_en;       // Peripheral enable (high active)
 output [`PMEM_MSB:0] pmem_addr;    // Program Memory address
 output               pmem_cen;     // Program Memory chip enable (low active)
@@ -173,7 +173,7 @@ omsp_clock_module clock_module_0 (
     .per_addr     (per_addr),      // Peripheral address
     .per_din      (per_din),       // Peripheral data input
     .per_en       (per_en),        // Peripheral enable (high active)
-    .per_wen      (per_wen),       // Peripheral write enable (high active)
+    .per_we       (per_we),        // Peripheral write enable (high active)
     .reset_n      (reset_n),       // Reset Pin (low active)
     .scg1         (scg1),          // System clock generator 1. Turns off the SMCLK
     .wdt_reset    (wdt_reset)      // Watchdog-timer reset
@@ -289,7 +289,7 @@ omsp_mem_backbone mem_backbone_0 (
     .fe_pmem_wait (fe_pmem_wait),  // Frontend wait for Instruction fetch
     .per_addr     (per_addr),      // Peripheral address
     .per_din      (per_din),       // Peripheral data input
-    .per_wen      (per_wen),       // Peripheral write enable (high active)
+    .per_we       (per_we),        // Peripheral write enable (high active)
     .per_en       (per_en),        // Peripheral enable (high active)
     .pmem_addr    (pmem_addr),     // Program Memory address
     .pmem_cen     (pmem_cen),      // Program Memory chip enable (low active)
@@ -335,7 +335,7 @@ omsp_sfr sfr_0 (
     .per_addr     (per_addr),      // Peripheral address
     .per_din      (per_din),       // Peripheral data input
     .per_en       (per_en),        // Peripheral enable (high active)
-    .per_wen      (per_wen),       // Peripheral write enable (high active)
+    .per_we       (per_we),        // Peripheral write enable (high active)
     .por          (por),           // Power-on reset
     .puc          (puc),           // Main system reset
     .wdtifg_clr   (irq_acc[10]),   // Clear Watchdog-timer interrupt flag
@@ -367,7 +367,7 @@ omsp_watchdog watchdog_0 (
     .per_addr     (per_addr),      // Peripheral address
     .per_din      (per_din),       // Peripheral data input
     .per_en       (per_en),        // Peripheral enable (high active)
-    .per_wen      (per_wen),       // Peripheral write enable (high active)
+    .per_we       (per_we),        // Peripheral write enable (high active)
     .puc          (puc),           // Main system reset
     .smclk_en     (smclk_en),      // SMCLK enable
     .wdtie        (wdtie)          // Watchdog-timer interrupt enable

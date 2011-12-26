@@ -51,7 +51,7 @@ module  omsp_mem_backbone (
     fe_pmem_wait,                   // Frontend wait for Instruction fetch
     per_addr,                       // Peripheral address
     per_din,                        // Peripheral data input
-    per_wen,                        // Peripheral write enable (high active)
+    per_we,                         // Peripheral write enable (high active)
     per_en,                         // Peripheral enable (high active)
     pmem_addr,                      // Program Memory address
     pmem_cen,                       // Program Memory chip enable (low active)
@@ -89,7 +89,7 @@ output        [15:0] fe_mdb_in;     // Frontend Memory data bus input
 output               fe_pmem_wait;  // Frontend wait for Instruction fetch
 output         [7:0] per_addr;      // Peripheral address
 output        [15:0] per_din;       // Peripheral data input
-output         [1:0] per_wen;       // Peripheral write enable (high active)
+output         [1:0] per_we;        // Peripheral write enable (high active)
 output               per_en;        // Peripheral enable (high active)
 output [`PMEM_MSB:0] pmem_addr;     // Program Memory address
 output               pmem_cen;      // Program Memory chip enable (low active)
@@ -175,7 +175,7 @@ wire         eu_per_en     =  eu_mb_en   & (eu_mab[14:8]==7'h00);
 
 wire   [7:0] per_addr      =  dbg_mem_en ? dbg_mem_addr[8:1] : eu_mab[7:0];
 wire  [15:0] per_din       =  dbg_mem_en ? dbg_mem_dout      : eu_mdb_out;
-wire   [1:0] per_wen       =  dbg_mem_en ? dbg_mem_wr        : eu_mb_wr;
+wire   [1:0] per_we        =  dbg_mem_en ? dbg_mem_wr        : eu_mb_wr;
 wire         per_en        =  dbg_mem_en ? dbg_per_en        : eu_per_en;
 
 reg   [15:0] per_dout_val;
