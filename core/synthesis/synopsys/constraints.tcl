@@ -123,7 +123,7 @@ set IRQ_ACC_DLY      [expr ($CLOCK_PERIOD/100) * 60]
 
 set PER_ADDR_DLY     [expr ($CLOCK_PERIOD/100) * 25]
 set PER_DIN_DLY      [expr ($CLOCK_PERIOD/100) * 25]
-set PER_WEN_DLY      [expr ($CLOCK_PERIOD/100) * 25]
+set PER_WE_DLY       [expr ($CLOCK_PERIOD/100) * 25]
 set PER_EN_DLY       [expr ($CLOCK_PERIOD/100) * 25]
 
 set PUC_DLY          [expr ($CLOCK_PERIOD/100) * 75]
@@ -148,7 +148,7 @@ set_output_delay 0                          -min -clock "dco_clk"             [g
 set_output_delay $PER_DIN_DLY    -add_delay -max -clock "dco_clk"             [get_ports per_din]
 set_output_delay 0                          -min -clock "dco_clk"             [get_ports per_din]
 
-set_output_delay $PER_WEN_DLY    -add_delay -max -clock "dco_clk"             [get_ports per_we]
+set_output_delay $PER_WE_DLY     -add_delay -max -clock "dco_clk"             [get_ports per_we]
 set_output_delay 0                          -min -clock "dco_clk"             [get_ports per_we]
 
 set_output_delay $PER_EN_DLY     -add_delay -max -clock "dco_clk"             [get_ports per_en]
