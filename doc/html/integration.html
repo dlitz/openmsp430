@@ -23,7 +23,7 @@
 This chapter aims to give a comprehensive description of all openMSP430 core interfaces in order to facilitates its integration within an ASIC or FPGA.<br /><br />
 
 The following diagram shows an overview of the openMSP430 core connectivity:<br /><br />
-<img src="usercontent,img,1306268589" width="100%" alt="Core Integration - 24 May 2011" title="Core Integration - 24 May 2011" />
+<img src="images/core_integration.png" width="100%" alt="Core Integration - 24 May 2011" title="Core Integration - 24 May 2011" />
 <br /><br />
 The full pinout of the core is summarized in the following table.<br />
 <br />
@@ -236,7 +236,7 @@ The full pinout of the core is summarized in the following table.<br />
 
 The different clocks in the design are managed by the Basic Clock Module:
 <br /><br />
-<img src="getimg.php?1246434498" width="75%" alt="Clock structure diagram" title="Clock structure diagram" />
+<img src="images/clock_diagram.png" width="75%" alt="Clock structure diagram" title="Clock structure diagram" />
 <br />
 <ul>
 	<li>
@@ -259,13 +259,13 @@ The different clocks in the design are managed by the Basic Clock Module:
 	<li>
 	     <b><font color="#00b000">ACLK_EN / SMCLK_EN</font></b>: these two clock enable signals can be used in order to emulate the original ACLK and SMCLK from the MSP430 specification.<br />
 	    An example of this can be found in the Watchdog and TimerA modules, where it is implemented as following:<br /><br />
-<img src="getimg.php?1246434793" alt="Clock implementation example" title="Clock implementation example" />
+<img src="images/clock_example.png" alt="Clock implementation example" title="Clock implementation example" />
 	     <br /><br />
 	</li>
 </ul>
  
 As an illustration, the following waveform shows the different clocks where the software running on the openMSP430 configures the BCSCTL1 and BCSCTL2 registers so that <i>ACLK_EN</i> and <i>SMCLK_EN</i> are respectively running at <i>LFXT_CLK/2</i> and <i>DCO_CLK/4</i>.<br /><br />
-<img src="getimg.php?1263320613" width="100%" alt="Waveforms: Clocks - Jan 12. 2010" title="Waveforms: Clocks - Jan 12. 2010" />
+<img src="images/wave_clocks.png" width="100%" alt="Waveforms: Clocks - Jan 12. 2010" title="Waveforms: Clocks - Jan 12. 2010" />
 <br /><br />
 
 <a name="3. Resets"></a>
@@ -282,7 +282,7 @@ As an illustration, the following waveform shows the different clocks where the 
 	</li>
 </ul>
 The following waveform illustrates this:<br /><br />
-<img src="getimg.php?1263320655" width="100%" alt="Waveforms: Resets - Jan 12. 2010" title="Waveforms: Resets - Jan 12. 2010" />
+<img src="images/wave_resets.png" width="100%" alt="Waveforms: Resets - Jan 12. 2010" title="Waveforms: Resets - Jan 12. 2010" />
  <br /><br />
 
 <a name="4. Program Memory"></a>
@@ -319,7 +319,7 @@ That said, the protocol between the openMSP430 and the program memory is quite s
 	</li>
 </ul>
 The following waveform illustrates some read accesses of the program memory (write access are illustrated in the data memory section):<br /><br />
-<img src="getimg.php?1263320706" width="100%" alt="Waveforms: Program memory - Jan " title="Waveforms: Program memory - Jan " />
+<img src="images/wave_pmem.png" width="100%" alt="Waveforms: Program memory - Jan " title="Waveforms: Program memory - Jan " />
 <br /><br />	
 <a name="5. Data Memory"></a>	
 <div style="text-align: right"><a href="#TOC">Top</a></div>
@@ -351,7 +351,7 @@ The protocol between the openMSP430 and the data memory is the same as the one o
 	</li>
 </ul>
 The following waveform illustrates some read/write access to the data memory:<br /><br />
-<img src="getimg.php?1263320770" width="100%" alt="Waveforms: Data memory - Jan 12." title="Waveforms: Data memory - Jan 12." />
+<img src="images/wave_dmem.png" width="100%" alt="Waveforms: Data memory - Jan 12." title="Waveforms: Data memory - Jan 12." />
 <br /><br />
 	
 <a name="6. Peripherals"></a>	
@@ -387,7 +387,7 @@ The signal description therefore goes as following:
 	</li>
 </ul>
 The following waveform illustrates some read/write access to the peripheral registers:<br /><br />
-<img src="getimg.php?1263320825" width="100%" alt="Waveforms: Peripherals - Jan 12." title="Waveforms: Peripherals - Jan 12." />
+<img src="images/wave_per.png" width="100%" alt="Waveforms: Peripherals - Jan 12." title="Waveforms: Peripherals - Jan 12." />
 <br /><br />
 
 	
@@ -504,7 +504,7 @@ It is internally synchronized to the <i>MCLK</i> domain and can therefore be con
 	</li>
 </ul>
 The following waveform illustrates a TAIV interrupt issued by the Timer-A, which is connected to <i>IRQ[8]</i> :<br /><br />
-<img src="getimg.php?1263320861" width="100%" alt="Waveforms: Interrupts - Jan 12. " title="Waveforms: Interrupts - Jan 12. " />
+<img src="images/wave_irq.png" width="100%" alt="Waveforms: Interrupts - Jan 12. " title="Waveforms: Interrupts - Jan 12. " />
 
 <br /><br />
 
@@ -531,7 +531,7 @@ For example, it is used by the Watchdog timer in order to stop its free-running 
 	</li>
 </ul>
 The following waveform shows some communication traffic on the serial bus :<br /><br />
-<img src="getimg.php?1263320887" width="100%" alt="Waveforms: SDI - Jan 12. 2010" title="Waveforms: SDI - Jan 12. 2010" />
+<img src="images/wave_sdi.png" width="100%" alt="Waveforms: SDI - Jan 12. 2010" title="Waveforms: SDI - Jan 12. 2010" />
 <br /><br />
 </body>
 </html>

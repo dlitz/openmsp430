@@ -62,7 +62,7 @@ In addition to the CPU core itself, several peripherals are also provided and ca
 
 The following diagram shows the openMSP430 design structure:
 <br /><br />
-<img src="getimg.php?1267738921" width="100%" alt="CPU Structure" title="CPU Structure" />
+<img src="images/cpu_structure.png" width="100%" alt="CPU Structure" title="CPU Structure" />
 <br />
 <ul>
 	<li><b>Frontend</b>: This module performs the instruction Fetch and Decode tasks. It also contains the execution state machine.</li>
@@ -331,7 +331,7 @@ The basic system configuration section allows to adjust program and data memory 
 However, an increasing number of users saw the 512B space available for peripherals in the standard MSP430 architecture as a limitation. Therefore, the advanced system configuration section give the possibility to up-scale the reserved peripheral address space anywhere between 512B and 32kB. As a consequence, the data memory space will be shifted up, which means that the linker script of your favorite toolchain will have to be modified accordingly.<br />
 The following schematic should hopefully summarize this:<br />
 <br /><br />
-<img src="usercontent,img,1306066277" width="100%" alt="Memory mapping" title="Memory mapping" />
+<img src="images/cpu_mem_space.png" width="100%" alt="Memory mapping" title="Memory mapping" />
 <br />
 
 <br /><br />
@@ -643,14 +643,14 @@ In order to make an FPGA implementation as simple as possible (ideally, a non-de
 <br />
 With these constrains, the Basic Clock Module is implemented as following:
 <br /><br />
-<img src="getimg.php?1249244393" alt="Clock structure diagram" title="Clock structure diagram" />
+<img src="images/clock_diagram.png" alt="Clock structure diagram" title="Clock structure diagram" />
 <br />
 <b>Note</b>: CPUOFF doesn't switch MCLK off and will instead bring the CPU state machines in an IDLE state while MCLK will still be running.
 <br /><br />
 
 In order to '<i>clock</i>' a register with ACLK or SMCLK, the following structure needs to be implemented:
 <br /><br />
-<img src="getimg.php?1246434793" alt="Clock implementation example" title="Clock implementation example" />
+<img src="images/clock_example.png" alt="Clock implementation example" title="Clock implementation example" />
 <br /><br />
 The following Verilog code would implement a counter clocked with SMCLK:
 <br />
