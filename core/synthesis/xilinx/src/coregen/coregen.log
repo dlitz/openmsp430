@@ -1,12 +1,11 @@
+Initializing CoreGen with the user repository list from
+'/home/dwon/.Xilinx/CoreGen/13.3/indexes/xil_index_map.xml'.
 Welcome to Xilinx CORE Generator.
-Help system initialised.
-Wrote project file
-/home/pitchu/Projects/verilog/openMSP430/core/synthesis/xilinx/src/coregen/virte
-x4lx.cgp
-Closed project file.
-New Project Cancelled.
-Wrote project file
-/home/pitchu/Projects/verilog/openMSP430/core/synthesis/xilinx/src/coregen/coreg
-en.cgp
-Closed project file.
-New Project Cancelled.
+Help system initialized.
+CoreGen has not been configured with any user repositories.
+CoreGen has been configured with the following Xilinx repositories:
+ - '/opt/Xilinx/13.3/ISE_DS/ISE/coregen/' [using existing xil_index.xml]
+The IP Catalog has been reloaded.
+Opening project file
+/home/dwon/Projects/FPGA/floppy-controller/swfdc/3rdparty/openmsp430/core/synthe
+sis/xilinx/src/coregen/coregen.cgp.
