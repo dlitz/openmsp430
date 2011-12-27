@@ -14,7 +14,7 @@ namespace eval ::spartan3e_dmem_xmdf {
 # Optional when the use context does not require the param or ports
 # arrays to be available.
 proc ::spartan3e_dmem_xmdf::xmdfInit { instance } {
-# Variable containg name of library into which module is compiled
+# Variable containing name of library into which module is compiled
 # Recommendation: <module_name>
 # Required
 utilities_xmdf::xmdfSetData $instance Module Attributes Name spartan3e_dmem
@@ -30,14 +30,17 @@ set fcount 0
 # Examples include unisim and xilinxcorelib
 # Optional
 # In this example, we assume that the unisim library will
-# be magically
-# available to the simulation and synthesis tool
+# be available to the simulation and synthesis tool
 utilities_xmdf::xmdfSetData $instance FileSet $fcount type logical_library
 utilities_xmdf::xmdfSetData $instance FileSet $fcount logical_library unisim
 incr fcount
 
 utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path blk_mem_gen_ds512.pdf
 utilities_xmdf::xmdfSetData $instance FileSet $fcount type AnyView
+incr fcount
+
+utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path blk_mem_gen_v6_2_readme.txt
+utilities_xmdf::xmdfSetData $instance FileSet $fcount type text
 incr fcount
 
 utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path spartan3e_dmem.ngc
@@ -56,7 +59,55 @@ utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path spartan3e_dm
 utilities_xmdf::xmdfSetData $instance FileSet $fcount type coregen_ip
 incr fcount
 
+utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path spartan3e_dmem_ste/example_design/bmg_wrapper.vhd
+utilities_xmdf::xmdfSetData $instance FileSet $fcount type Ignore
+incr fcount
+
+utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path spartan3e_dmem_ste/example_design/spartan3e_dmem_top.ucf
+utilities_xmdf::xmdfSetData $instance FileSet $fcount type Ignore
+incr fcount
+
+utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path spartan3e_dmem_ste/example_design/spartan3e_dmem_top.vhd
+utilities_xmdf::xmdfSetData $instance FileSet $fcount type Ignore
+incr fcount
+
+utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path spartan3e_dmem_ste/example_design/spartan3e_dmem_top.xdc
+utilities_xmdf::xmdfSetData $instance FileSet $fcount type Ignore
+incr fcount
+
+utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path spartan3e_dmem_ste/implement/implement.bat
+utilities_xmdf::xmdfSetData $instance FileSet $fcount type Ignore
+incr fcount
+
+utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path spartan3e_dmem_ste/implement/implement.sh
+utilities_xmdf::xmdfSetData $instance FileSet $fcount type Ignore
+incr fcount
+
+utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path spartan3e_dmem_ste/implement/planAhead_rdn.bat
+utilities_xmdf::xmdfSetData $instance FileSet $fcount type Ignore
+incr fcount
+
+utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path spartan3e_dmem_ste/implement/planAhead_rdn.sh
+utilities_xmdf::xmdfSetData $instance FileSet $fcount type Ignore
+incr fcount
+
+utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path spartan3e_dmem_ste/implement/planAhead_rdn.tcl
+utilities_xmdf::xmdfSetData $instance FileSet $fcount type Ignore
+incr fcount
+
+utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path spartan3e_dmem_ste/implement/xst.prj
+utilities_xmdf::xmdfSetData $instance FileSet $fcount type Ignore
+incr fcount
+
+utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path spartan3e_dmem_ste/implement/xst.scr
+utilities_xmdf::xmdfSetData $instance FileSet $fcount type Ignore
+incr fcount
+
 utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path spartan3e_dmem_xmdf.tcl
+utilities_xmdf::xmdfSetData $instance FileSet $fcount type AnyView
+incr fcount
+
+utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path summary.log
 utilities_xmdf::xmdfSetData $instance FileSet $fcount type AnyView
 incr fcount
 
