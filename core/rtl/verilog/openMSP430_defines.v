@@ -69,9 +69,9 @@
 //`define PMEM_SIZE_24_KB
 //`define PMEM_SIZE_16_KB
 //`define PMEM_SIZE_12_KB
-//`define PMEM_SIZE_8_KB
+`define PMEM_SIZE_8_KB
 //`define PMEM_SIZE_4_KB
-`define PMEM_SIZE_2_KB
+//`define PMEM_SIZE_2_KB
 //`define PMEM_SIZE_1_KB
 
 
@@ -86,11 +86,11 @@
 //`define DMEM_SIZE_5_KB
 //`define DMEM_SIZE_4_KB
 //`define DMEM_SIZE_2p5_KB
-//`define DMEM_SIZE_2_KB
+`define DMEM_SIZE_2_KB
 //`define DMEM_SIZE_1_KB
 //`define DMEM_SIZE_512_B
 //`define DMEM_SIZE_256_B
-`define DMEM_SIZE_128_B
+//`define DMEM_SIZE_128_B
 
 
 // Include/Exclude Hardware Multiplier
