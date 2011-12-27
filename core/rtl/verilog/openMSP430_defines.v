@@ -136,7 +136,7 @@
 // when the program memory can only be initialized through
 // the serial debug interface.
 //-------------------------------------------------------
-//`define DBG_RST_BRK_EN
+`define DBG_RST_BRK_EN
 
 
 //-------------------------------------------------------
