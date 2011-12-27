@@ -1,3 +1,3 @@
 
-`define SPARTAN3
+`define SPARTAN3E
 
