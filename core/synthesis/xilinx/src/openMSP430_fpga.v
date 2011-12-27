@@ -53,6 +53,8 @@ module openMSP430_fpga (
     smclk_en,                     // SMCLK enable
 
 // INPUTs
+    cpu_en,                       // Enable CPU code execution (asynchronous)
+    dbg_en,                       // Debug interface enable (asynchronous)
     dbg_uart_rxd,                 // Debug interface: UART RXD
     dco_clk,                      // Fast oscillator (fast clock)
     irq,                          // Maskable interrupts
@@ -77,6 +79,8 @@ output              smclk_en;     // SMCLK enable
 
 // INPUTs
 //=========
+input               cpu_en;       // Enable CPU code execution (asynchronous)
+input               dbg_en;       // Debug interface enable (asynchronous)
 input               dbg_uart_rxd; // Debug interface: UART RXD
 input               dco_clk;      // Fast oscillator (fast clock)
 input  	     [13:0] irq;          // Maskable interrupts
@@ -176,6 +180,8 @@ openMSP430 openMSP430_0 (
     .smclk_en     (smclk_en),     // SMCLK enable
 
 // INPUTs
+    .cpu_en       (cpu_en),       // Enable CPU code execution (asynchronous)
+    .dbg_en       (dbg_en),       // Debug interface enable (asynchronous)
     .dbg_uart_rxd (dbg_uart_rxd), // Debug interface: UART RXD
     .dco_clk      (dco_clk),      // Fast oscillator (fast clock)
     .dmem_dout    (dmem_dout),    // Data Memory data output
