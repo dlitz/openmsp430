@@ -102,18 +102,18 @@ wire          [1:0] pmem_wen;
 wire         [15:0] pmem_dout;
 
 wire                mclk;
-wire                puc;
+wire                puc_rst;
 
   
 //=============================================================================
 // 2)  PROGRAM AND DATA MEMORIES
 //=============================================================================
 
-dmem dmem_hi (.WD(dmem_din[15:8]), .RD(dmem_dout[15:8]), .WEN(dmem_wen[1] | dmem_cen), .REN(dmem_cen), .WADDR(dmem_addr) , .RADDR(dmem_addr), .RWCLK(mclk), .RESET(puc));
-dmem dmem_lo (.WD(dmem_din[7:0]),  .RD(dmem_dout[7:0]),  .WEN(dmem_wen[0] | dmem_cen), .REN(dmem_cen), .WADDR(dmem_addr) , .RADDR(dmem_addr), .RWCLK(mclk), .RESET(puc));
+dmem dmem_hi (.WD(dmem_din[15:8]), .RD(dmem_dout[15:8]), .WEN(dmem_wen[1] | dmem_cen), .REN(dmem_cen), .WADDR(dmem_addr) , .RADDR(dmem_addr), .RWCLK(mclk), .RESET(puc_rst));
+dmem dmem_lo (.WD(dmem_din[7:0]),  .RD(dmem_dout[7:0]),  .WEN(dmem_wen[0] | dmem_cen), .REN(dmem_cen), .WADDR(dmem_addr) , .RADDR(dmem_addr), .RWCLK(mclk), .RESET(puc_rst));
 
-pmem pmem_hi (.WD(pmem_din[15:8]), .RD(pmem_dout[15:8]), .WEN(pmem_wen[1] | pmem_cen), .REN(pmem_cen), .WADDR(pmem_addr) , .RADDR(pmem_addr), .RWCLK(mclk), .RESET(puc));
-pmem pmem_lo (.WD(pmem_din[7:0]),  .RD(pmem_dout[7:0]),  .WEN(pmem_wen[0] | pmem_cen), .REN(pmem_cen), .WADDR(pmem_addr) , .RADDR(pmem_addr), .RWCLK(mclk), .RESET(puc));
+pmem pmem_hi (.WD(pmem_din[15:8]), .RD(pmem_dout[15:8]), .WEN(pmem_wen[1] | pmem_cen), .REN(pmem_cen), .WADDR(pmem_addr) , .RADDR(pmem_addr), .RWCLK(mclk), .RESET(puc_rst));
+pmem pmem_lo (.WD(pmem_din[7:0]),  .RD(pmem_dout[7:0]),  .WEN(pmem_wen[0] | pmem_cen), .REN(pmem_cen), .WADDR(pmem_addr) , .RADDR(pmem_addr), .RWCLK(mclk), .RESET(puc_rst));
 
 
 //=============================================================================
@@ -140,7 +140,7 @@ openMSP430 openMSP430_0 (
     .pmem_cen     (pmem_cen),     // Program Memory chip enable (low active)
     .pmem_din     (pmem_din),     // Program Memory data input (optional)
     .pmem_wen     (pmem_wen),     // Program Memory write enable (low active) (optional)
-    .puc          (puc),          // Main system reset
+    .puc_rst      (puc_rst),      // Main system reset
     .smclk_en     (smclk_en),     // SMCLK enable
 
 // INPUTs

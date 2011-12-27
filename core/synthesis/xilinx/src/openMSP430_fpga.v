@@ -107,7 +107,7 @@ wire          [1:0] pmem_wen;
 wire         [15:0] pmem_dout;
 
 wire                mclk;
-wire                puc;
+wire                puc_rst;
 
   
 //=============================================================================
@@ -176,7 +176,7 @@ openMSP430 openMSP430_0 (
     .pmem_cen     (pmem_cen),     // Program Memory chip enable (low active)
     .pmem_din     (pmem_din),     // Program Memory data input (optional)
     .pmem_wen     (pmem_wen),     // Program Memory write enable (low active) (optional)
-    .puc          (puc),          // Main system reset
+    .puc_rst      (puc_rst),      // Main system reset
     .smclk_en     (smclk_en),     // SMCLK enable
 
 // INPUTs
