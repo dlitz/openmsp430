@@ -93,7 +93,7 @@ output        [15:0] dmem_din;     // Data Memory data input
 output         [1:0] dmem_wen;     // Data Memory write enable (low active)
 output        [13:0] irq_acc;      // Interrupt request accepted (one-hot signal)
 output               mclk;         // Main system clock
-output        [13:0] per_addr;     // Peripheral address
+output  [`PER_MSB:0] per_addr;     // Peripheral address
 output        [15:0] per_din;      // Peripheral data input
 output         [1:0] per_we;       // Peripheral write enable (high active)
 output               per_en;       // Peripheral enable (high active)
