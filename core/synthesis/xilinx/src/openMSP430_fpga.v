@@ -70,7 +70,7 @@ output              aclk_en;      // ACLK enable
 output              dbg_freeze;   // Freeze peripherals
 output              dbg_uart_txd; // Debug interface: UART TXD
 output       [13:0] irq_acc;      // Interrupt request accepted (one-hot signal)
-output        [7:0] per_addr;     // Peripheral address
+output       [13:0] per_addr;     // Peripheral address
 output       [15:0] per_din;      // Peripheral data input
 output        [1:0] per_we;       // Peripheral write enable (high active)
 output              per_en;       // Peripheral enable (high active)
