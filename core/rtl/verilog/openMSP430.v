@@ -349,6 +349,7 @@ omsp_execution_unit execution_unit_0 (
 // OUTPUTs
     .cpuoff       (cpuoff),        // Turns off the CPU
     .dbg_reg_din  (dbg_reg_din),   // Debug unit CPU register data input
+    .gie          (gie),           // General interrupt enable
     .mab          (eu_mab),        // Memory address bus
     .mb_en        (eu_mb_en),      // Memory bus enable
     .mb_wr        (eu_mb_wr),      // Memory bus write transfer
@@ -365,7 +366,6 @@ omsp_execution_unit execution_unit_0 (
     .dbg_reg_wr   (dbg_reg_wr),    // Debug unit CPU register write
     .e_state      (e_state),       // Execution state
     .exec_done    (exec_done),     // Execution completed
-    .gie          (gie),           // General interrupt enable
     .inst_ad      (inst_ad),       // Decoded Inst: destination addressing mode
     .inst_as      (inst_as),       // Decoded Inst: source addressing mode
     .inst_alu     (inst_alu),      // ALU control signals

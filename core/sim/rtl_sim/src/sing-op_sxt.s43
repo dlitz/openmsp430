@@ -120,21 +120,21 @@ main:
 
         # Addressing mode: EDE
 	#------------------------
-.set   EDE_218,  DMEM_218
-.set   EDE_21A,  DMEM_21A
-.set   EDE_21C,  DMEM_21C
-.set   EDE_21E,  DMEM_21E
+.set   EDE_218,  DMEM_218+PMEM_EDE_LENGTH
+.set   EDE_21A,  DMEM_21A+PMEM_EDE_LENGTH
+.set   EDE_21C,  DMEM_21C+PMEM_EDE_LENGTH
+.set   EDE_21E,  DMEM_21E+PMEM_EDE_LENGTH
 
 	mov     #0x0100, r2        ;# Test 1
 	mov     #0x7524, &DMEM_218
 	mov     #0xaaaa, &DMEM_21A
-	sxt     EDE_218+PMEM_LENGTH            ;# SXT (mem0c=0x7524  => {mem0c=0x0024)
+	sxt     EDE_218            ;# SXT (mem0c=0x7524  => {mem0c=0x0024)
 	mov          r2, r5
 
 	mov     #0x0100, r2        ;# Test 2
 	mov     #0x1cb6, &DMEM_21A
 	mov     #0xaaaa, &DMEM_21C
-	sxt     EDE_21A+PMEM_LENGTH            ;# SXT (mem0d=0x1cb6  => {mem0d=0xffb6)
+	sxt     EDE_21A            ;# SXT (mem0d=0x1cb6  => {mem0d=0xffb6)
 	mov          r2, r7
 
 	mov     #0x5000, r15

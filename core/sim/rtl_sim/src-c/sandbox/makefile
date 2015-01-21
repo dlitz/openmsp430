@@ -1,12 +1,23 @@
 # makfile configuration
 NAME            = sandbox
-OBJECTS         = main.o
+OBJECTS         = main.o copydata.o
 
-#CFLAGS          = -O2 -Wall -g                                          # Old flags
-CFLAGS          = -O2 -Wall -g -mcpu=430 -mivcnt=16 -mmpy=none           # Uniarch flags
+# Choose GCC toolchain prefix ('msp430' for MSPGCC / 'msp430-elf' for GCC RedHat/TI)
+ifndef MSPGCC_PFX
+MSPGCC_PFX      = msp430
+endif
 
-#switch the compiler (for the internal make rules)
-CC              = msp430-gcc
+# Select flags depending on selected toolchain
+ifeq ($(MSPGCC_PFX),msp430-elf)
+CFLAGS          = -D PFX_MSP430_ELF -O2 -Wall -g -mcpu=msp430 -mhwmult=none
+else
+CFLAGS          = -D PFX_MSP430     -O2 -Wall -g -mcpu=430    -mmpy=none    -mivcnt=16
+endif
+
+# Toolchain executables
+CC              = ${MSPGCC_PFX}-gcc
+OBJCOPY		= ${MSPGCC_PFX}-objcopy
+OBJDUMP         = ${MSPGCC_PFX}-objdump
 
 
 .PHONY: all FORCE clean download download-jtag download-bsl dist
@@ -16,24 +27,16 @@ all: ${NAME}.elf ${NAME}.a43 ${NAME}.lst
 
 #confgigure the next line if you want to use the serial download
 download: download-uart
-#download: download-jtag
-#download: download-bsl
 
 #additional rules for files
 ${NAME}.elf: ${OBJECTS}
-	${CC} -T linker.x -o $@ ${OBJECTS}
+	${CC} ${CFLAGS} -T linker.${MSPGCC_PFX}.x -o $@ ${OBJECTS}
 
 ${NAME}.a43: ${NAME}.elf
-	msp430-objcopy -O ihex $^ $@
+	${OBJCOPY} -O ihex $^ $@
 
 ${NAME}.lst: ${NAME}.elf
-	msp430-objdump -dSt $^ >$@
-
-download-jtag: all
-	msp430-jtag -e ${NAME}.elf
-
-download-bsl: all
-	msp430-bsl -e ${NAME}.elf
+	${OBJDUMP} -dSt $^ >$@
 
 download-uart: all
 	openmsp430-loader.tcl -device /dev/ttyUSB0 -baudrate 115200 ${NAME}.elf
@@ -50,4 +53,4 @@ FORCE:
 
 #project dependencies
 main.o: main.c
-
+copydata.o: copydata.c

@@ -21,7 +21,7 @@
 /* Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA        */
 /*                                                                           */
 /*===========================================================================*/
-/*                                 SANDBOX                                   */
+/*                              DHRYSTONE V2.1                               */
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /* Author(s):                                                                */
@@ -41,7 +41,7 @@ time dhry_start_time, dhry_end_time;
 real dhry_per_sec,    dhry_mips,     dhry_mips_per_mhz;
 
 integer Number_Of_Runs;
-  
+
 initial
    begin
       $display(" ===============================================");
@@ -54,17 +54,23 @@ initial
       // Check CPU configuration
       //---------------------------------------
 
-      if ((`PMEM_SIZE !== 24576) || (`DMEM_SIZE !== 16384))
+      if ((`PMEM_SIZE !== 49152) || (`DMEM_SIZE !== 10240))
         begin
            $display(" ===============================================");
            $display("|               SIMULATION ERROR                |");
            $display("|                                               |");
            $display("|  Core must be configured for:                 |");
-           $display("|               - 24kB program memory           |");
-           $display("|               - 16kB data memory              |");
+           $display("|               - 48kB program memory           |");
+           $display("|               - 10kB data memory              |");
            $display(" ===============================================");
-           $finish;        
+           $finish;
         end
+
+      // Disable watchdog
+      // (only required because RedHat/TI GCC toolchain doesn't disable watchdog properly at startup)
+      `ifdef WATCHDOG
+        force dut.watchdog_0.wdtcnt   = 16'h0000;
+      `endif
 
       //---------------------------------------
       // Number of benchmark iteration
@@ -97,13 +103,16 @@ initial
       dhry_start_time = $time;
       $timeformat(-3, 3, " ms", 10);
       $display("\nINFO-VERILOG: Dhrystone loop started at %t ", dhry_start_time);
- 
+      $display("");
+      $display("INFO-VERILOG: Be patient... there could be up to 16ms to simulate");
+      $display("");
+
       // Detect end of run
       @(negedge p3_dout[0]);
       dhry_end_time = $time;
       $timeformat(-3, 3, " ms", 10);
       $display("INFO-VERILOG: Dhrystone loop ended   at %t ",   dhry_end_time);
- 
+
       // Compute results
       $timeformat(-9, 3, " ns", 10);
       dhry_per_sec      = (Number_Of_Runs*1000000000)/(dhry_end_time - dhry_start_time);
@@ -119,7 +128,7 @@ initial
       // Wait for the end of C-code execution
       //---------------------------------------
       @(posedge p4_dout[0]);
- 
+
       stimulus_done = 1;
 
       $display(" ===============================================");
@@ -134,4 +143,17 @@ initial
 always @(p2_dout[0])
   begin
      $write("%s", p1_dout);
+     $fflush();
+  end
+
+// Display some info to show simulation progress
+initial
+  begin
+     @(posedge p3_dout[0]);
+     #1000000;
+     while (p3_dout[0])
+       begin
+	  $display("INFO-VERILOG: Simulated time %t ", $time);
+	  #1000000;
+       end
   end

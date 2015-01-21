@@ -21,9 +21,9 @@
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 //----------------------------------------------------------------------------
-// 
+//
 // *File Name: tb_openMSP430.v
-// 
+//
 // *Module Description:
 //                      openMSP430 testbench
 //
@@ -101,13 +101,6 @@ reg          [7:0] p6_din;
 wire        [15:0] per_dout_temp_8b;
 wire        [15:0] per_dout_temp_16b;
 
-// Simple full duplex UART
-wire        [15:0] per_dout_uart;
-wire               irq_uart_rx;
-wire               irq_uart_tx;
-wire               uart_txd;
-reg                uart_rxd;
-
 // Timer A
 wire               irq_ta0;
 wire               irq_ta1;
@@ -126,7 +119,7 @@ wire               ta_out1;
 wire               ta_out1_en;
 wire               ta_out2;
 wire               ta_out2_en;
-   
+
 // Clock / Reset & Interrupts
 reg                dco_clk;
 wire               dco_enable;
@@ -150,7 +143,7 @@ wire [`IRQ_NR-3:0] irq_in;
 reg                cpu_en;
 reg         [13:0] wkup;
 wire        [13:0] wkup_in;
-   
+
 // Scan (ASIC version only)
 reg                scan_enable;
 reg                scan_mode;
@@ -196,8 +189,9 @@ wire    [8*32-1:0] inst_full;
 wire        [31:0] inst_number;
 wire        [15:0] inst_pc;
 wire    [8*32-1:0] inst_short;
-   
+
 // Testbench variables
+integer            tb_idx;
 integer            error;
 reg                stimulus_done;
 
@@ -213,20 +207,23 @@ reg                stimulus_done;
 `include "dbg_uart_tasks.v"
 `include "dbg_i2c_tasks.v"
 
-// Simple uart tasks
-//`include "uart_tasks.v"
-
 // Verilog stimulus
 `include "stimulus.v"
 
-   
+
 //
-// Initialize ROM
+// Initialize Memory
 //------------------------------
 initial
   begin
+     // Initialize data memory
+     for (tb_idx=0; tb_idx < `DMEM_SIZE/2; tb_idx=tb_idx+1)
+       dmem_0.mem[tb_idx] = 16'h0000;
+
+     // Initialize program memory
      #10 $readmemh("./pmem.mem", pmem_0.mem);
   end
+
 
 //
 // Generate Clock & Reset
@@ -305,12 +302,11 @@ initial
      ta_cci1b                = 1'b0;
      ta_cci2a                = 1'b0;
      ta_cci2b                = 1'b0;
-     uart_rxd                = 1'b1;
      scan_enable             = 1'b0;
      scan_mode               = 1'b0;
   end
 
-   
+
 //
 // Program Memory
 //----------------------------------
@@ -444,7 +440,7 @@ omsp_gpio #(.P1_EN(1),
     .p6_dout_en   (p6_dout_en),        // Port 6 data output enable
     .p6_sel       (p6_sel),            // Port 6 function select
     .per_dout     (per_dout_dio),      // Peripheral data output
-                             
+
 // INPUTs
     .mclk         (mclk),              // Main system clock
     .p1_din       (p1_din),            // Port 1 data input
@@ -497,35 +493,7 @@ omsp_timerA timerA_0 (
     .ta_cci2b     (ta_cci2b),          // Timer A compare 2 input B
     .taclk        (taclk)              // TACLK external timer clock (SLOW)
 );
-   
-//
-// Simple full duplex UART (8N1 protocol)
-//----------------------------------------
-`ifdef READY_FOR_PRIMETIME
-omsp_uart #(.BASE_ADDR(15'h0080)) uart_0 (
 
-// OUTPUTs
-    .irq_uart_rx  (irq_uart_rx),   // UART receive interrupt
-    .irq_uart_tx  (irq_uart_tx),   // UART transmit interrupt
-    .per_dout     (per_dout_uart), // Peripheral data output
-    .uart_txd     (uart_txd),      // UART Data Transmit (TXD)
-
-// INPUTs
-    .mclk         (mclk),          // Main system clock
-    .per_addr     (per_addr),      // Peripheral address
-    .per_din      (per_din),       // Peripheral data input
-    .per_en       (per_en),        // Peripheral enable (high active)
-    .per_we       (per_we),        // Peripheral write enable (high active)
-    .puc_rst      (puc_rst),       // Main system reset
-    .smclk_en     (smclk_en),      // SMCLK enable (from CPU)
-    .uart_rxd     (uart_rxd)       // UART Data Receive (RXD)
-);
-`else
-    assign irq_uart_rx   =  1'b0;
-    assign irq_uart_tx   =  1'b0;
-    assign per_dout_uart = 16'h0000;
-    assign uart_txd      =  1'b0;
-`endif
 
 //
 // Peripheral templates
@@ -569,7 +537,6 @@ template_periph_16b #(.BASE_ADDR((15'd`PER_SIZE-15'h0070) & 15'h7ff8)) template_
 
 assign per_dout = per_dout_dio       |
                   per_dout_timerA    |
-                  per_dout_uart      |
                   per_dout_temp_8b   |
                   per_dout_temp_16b;
 
@@ -584,8 +551,8 @@ assign irq_in  = irq  | {1'b0,                 // Vector 13  (0xFFFA)
                          1'b0,                 // Vector 10  (0xFFF4) - Watchdog -
                          irq_ta0,              // Vector  9  (0xFFF2)
                          irq_ta1,              // Vector  8  (0xFFF0)
-                         irq_uart_rx,          // Vector  7  (0xFFEE)
-                         irq_uart_tx,          // Vector  6  (0xFFEC)
+                         1'b0,                 // Vector  7  (0xFFEE)
+                         1'b0,                 // Vector  6  (0xFFEC)
                          1'b0,                 // Vector  5  (0xFFEA)
                          1'b0,                 // Vector  4  (0xFFE8)
                          irq_port2,            // Vector  3  (0xFFE6)
@@ -615,8 +582,8 @@ assign wkup_in = wkup | {1'b0,                 // Vector 13  (0xFFFA)
 
 // I2C Bus
 //.........................
-pullup dbg_scl_inst (dbg_scl); 
-pullup dbg_sda_inst (dbg_sda); 
+pullup dbg_scl_inst (dbg_scl);
+pullup dbg_sda_inst (dbg_sda);
 
 // I2C Slave (openMSP430)
 //.........................
@@ -626,7 +593,7 @@ io_cell scl_slave_inst (
   .data_out_en (1'b0),                // Output enable
   .data_out    (1'b0)                 // Output
 );
-                                                           
+
 io_cell sda_slave_inst (
   .pad         (dbg_sda),             // I/O pad
   .data_in     (dbg_sda_slave_in),    // Input
@@ -642,7 +609,7 @@ io_cell scl_master_inst (
   .data_out_en (!dbg_scl_master),     // Output enable
   .data_out    (1'b0)                 // Output
 );
-                                                                   
+
 io_cell sda_master_inst (
   .pad         (dbg_sda),             // I/O pad
   .data_in     (dbg_sda_master_in),   // Input
@@ -703,10 +670,10 @@ initial // Timeout
    `else
      `ifdef VERY_LONG_TIMEOUT
        #500000000;
-     `else     
+     `else
      `ifdef LONG_TIMEOUT
        #5000000;
-     `else     
+     `else
        #500000;
      `endif
      `endif
@@ -722,7 +689,7 @@ initial // Normal end of test
   begin
      @(negedge stimulus_done);
      wait(inst_pc=='hffff);
-     
+
      $display(" ===============================================");
      if (error!=0)
        begin
@@ -734,7 +701,7 @@ initial // Normal end of test
           $display("|               SIMULATION FAILED               |");
           $display("|     (the verilog stimulus didn't complete)    |");
        end
-     else 
+     else
        begin
           $display("|               SIMULATION PASSED               |");
        end
