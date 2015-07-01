@@ -1,3 +1,7 @@
+2015-07-01 [r202]  
+
+	* Add DMA interface support + LINT cleanup
+
 2015-01-21 [r200]  
 
 	* Major verificaiton and benchmark update to support both MSPGCC
