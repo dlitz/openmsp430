@@ -40,7 +40,7 @@
 // $LastChangedBy$
 // $LastChangedDate$
 //----------------------------------------------------------------------------
-//`define OMSP_NO_INCLUDE
+`define OMSP_NO_INCLUDE
 `ifdef OMSP_NO_INCLUDE
 `else
 `include "openMSP430_undefines.v"
@@ -71,8 +71,8 @@
 //`define PMEM_SIZE_16_KB
 //`define PMEM_SIZE_12_KB
 //`define PMEM_SIZE_8_KB
-//`define PMEM_SIZE_4_KB
-`define PMEM_SIZE_2_KB
+`define PMEM_SIZE_4_KB
+//`define PMEM_SIZE_2_KB
 //`define PMEM_SIZE_1_KB
 
 
@@ -89,10 +89,10 @@
 //`define DMEM_SIZE_4_KB
 //`define DMEM_SIZE_2p5_KB
 //`define DMEM_SIZE_2_KB
-//`define DMEM_SIZE_1_KB
+`define DMEM_SIZE_1_KB
 //`define DMEM_SIZE_512_B
 //`define DMEM_SIZE_256_B
-`define DMEM_SIZE_128_B
+//`define DMEM_SIZE_128_B
 
 
 // Include/Exclude Hardware Multiplier
@@ -130,6 +130,12 @@
 //        - Possibility to generate a software PUC reset
 //-------------------------------------------------------
 `define WATCHDOG
+
+
+//-------------------------------------------------------
+// Include/Exclude DMA interface support
+//-------------------------------------------------------
+`define DMA_IF_EN
 
 
 //-------------------------------------------------------
@@ -281,15 +287,15 @@
 //               (i.e. the *_SIZE divided by 2)
 //-------------------------------------------------------
 
-// Custom Program memory (enabled with PMEM_SIZE_CUSTOM)
+// Custom Program memory    (enabled with PMEM_SIZE_CUSTOM)
 `define PMEM_CUSTOM_AWIDTH      10
 `define PMEM_CUSTOM_SIZE      2048
 
-// Custom Data memory    (enabled with DMEM_SIZE_CUSTOM)
+// Custom Data memory       (enabled with DMEM_SIZE_CUSTOM)
 `define DMEM_CUSTOM_AWIDTH       6
 `define DMEM_CUSTOM_SIZE       128
 
-// Custom Peripheral memory  (enabled with PER_SIZE_CUSTOM)
+// Custom Peripheral memory (enabled with PER_SIZE_CUSTOM)
 `define PER_CUSTOM_AWIDTH        8
 `define PER_CUSTOM_SIZE        512
 
@@ -304,7 +310,7 @@
 // WARNING: if you target an FPGA, leave this define
 //          commented.
 //-------------------------------------------------------
-//`define ASIC
+`define ASIC
 
 
 //============================================================================
@@ -363,7 +369,7 @@
 // DCO_CLK and LFXT_CLK with the BCSCTL2.SELMx register.
 // When commented, DCO_CLK is selected.
 //-------------------------------------------------------
-`define MCLK_MUX
+//`define MCLK_MUX
 
 //-------------------------------------------------------
 // SMCLK: Clock Mux
@@ -373,7 +379,7 @@
 // DCO_CLK and LFXT_CLK with the BCSCTL2.SELS register.
 // When commented, DCO_CLK is selected.
 //-------------------------------------------------------
-`define SMCLK_MUX
+//`define SMCLK_MUX
 
 //-------------------------------------------------------
 // WATCHDOG: Clock Mux
@@ -385,7 +391,7 @@
 // WATCHDOG_NOMUX_ACLK define is uncommented, SMCLK is
 // selected otherwise.
 //-------------------------------------------------------
-`define WATCHDOG_MUX
+//`define WATCHDOG_MUX
 //`define WATCHDOG_NOMUX_ACLK
 
 
@@ -777,6 +783,10 @@
 
 // Basic clock module: BCSCTL1 Control Register
 `define DIVAx       5:4
+`define DMA_CPUOFF  0
+`define DMA_SCG0    1
+`define DMA_SCG1    2
+`define DMA_OSCOFF  3
 
 // Basic clock module: BCSCTL2 Control Register
 `define SELMx       7
@@ -807,7 +817,10 @@
 //======================================
 
 // Debug interface: CPU version
-`define CPU_VERSION   3'h2
+//   1 - FPGA support only (Pre-BSD licence era)
+//   2 - Add ASIC support
+//   3 - Add DMA interface support
+`define CPU_VERSION   3'h3
 
 // Debug interface: Software breakpoint opcode
 `define DBG_SWBRK_OP 16'h4343

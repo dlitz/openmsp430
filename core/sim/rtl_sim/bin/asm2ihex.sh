@@ -46,7 +46,13 @@ if [ $# -ne $EXPECTED_ARGS ]; then
 fi
 
 # MSPGCC version prefix
-MSPGCC_PFX=${MSPGCC_PFX:=msp430}
+if [ -z "$MSPGCC_PFX" ]; then
+    if command -v msp430-gcc >/dev/null; then
+	MSPGCC_PFX=msp430
+    else
+	MSPGCC_PFX=msp430-elf
+    fi
+fi  
 
 ###############################################################################
 #               Check if definition & assembler files exist                   #
@@ -88,9 +94,11 @@ sed -i "s/PMEM_SIZE/$PMEM_SIZE/g"         pmem_defs.asm
 sed -i "s/PER_SIZE_HEX/$PER_SIZE/g"       pmem_defs.asm
 if [ $MSPGCC_PFX == "msp430-elf" ]; then
     sed -i "s/PER_SIZE/.data/g"           pmem_defs.asm
+    sed -i "s/PMEM_BASE_VAL/.text/g"      pmem_defs.asm
     sed -i "s/PMEM_EDE_SIZE/0/g"          pmem_defs.asm
 else
     sed -i "s/PER_SIZE/$PER_SIZE/g"       pmem_defs.asm
+    sed -i "s/PMEM_BASE_VAL/$PMEM_BASE/g" pmem_defs.asm
     sed -i "s/PMEM_EDE_SIZE/$PMEM_SIZE/g" pmem_defs.asm
 fi
 

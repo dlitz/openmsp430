@@ -68,6 +68,17 @@ wire        [15:0] per_dout;
 wire         [1:0] per_we;
 wire               per_en;
 
+// Direct Memory Access interface
+wire        [15:0] dma_dout;
+wire               dma_ready;
+wire               dma_resp;
+reg         [15:1] dma_addr;
+reg         [15:0] dma_din;
+reg                dma_en;
+reg                dma_priority;
+reg          [1:0] dma_we;
+reg                dma_wkup;
+
 // Digital I/O
 wire               irq_port1;
 wire               irq_port2;
@@ -192,6 +203,7 @@ wire    [8*32-1:0] inst_short;
 
 // Testbench variables
 integer            tb_idx;
+integer            tmp_seed;
 integer            error;
 reg                stimulus_done;
 
@@ -206,6 +218,9 @@ reg                stimulus_done;
 // Debug interface tasks
 `include "dbg_uart_tasks.v"
 `include "dbg_i2c_tasks.v"
+
+// Direct Memory Access interface tasks
+`include "dma_tasks.v"
 
 // Verilog stimulus
 `include "stimulus.v"
@@ -265,11 +280,20 @@ initial
 
 initial
   begin
+     tmp_seed                = `SEED;
+     tmp_seed                = $urandom(tmp_seed);
      error                   = 0;
      stimulus_done           = 1;
      irq                     = {`IRQ_NR-2{1'b0}};
      nmi                     = 1'b0;
      wkup                    = 14'h0000;
+     dma_addr                = 15'h0000;
+     dma_din                 = 16'h0000;
+     dma_en                  = 1'b0;
+     dma_priority            = 1'b0;
+     dma_we                  = 2'b00;
+     dma_wkup                = 1'b0;
+     dma_tfx_cancel          = 1'b0;
      cpu_en                  = 1'b1;
      dbg_en                  = 1'b0;
      dbg_uart_rxd_sel        = 1'b0;
@@ -314,14 +338,14 @@ initial
 ram #(`PMEM_MSB, `PMEM_SIZE) pmem_0 (
 
 // OUTPUTs
-    .ram_dout    (pmem_dout),          // Program Memory data output
+    .ram_dout          (pmem_dout),            // Program Memory data output
 
 // INPUTs
-    .ram_addr    (pmem_addr),          // Program Memory address
-    .ram_cen     (pmem_cen),           // Program Memory chip enable (low active)
-    .ram_clk     (mclk),               // Program Memory clock
-    .ram_din     (pmem_din),           // Program Memory data input
-    .ram_wen     (pmem_wen)            // Program Memory write enable (low active)
+    .ram_addr          (pmem_addr),            // Program Memory address
+    .ram_cen           (pmem_cen),             // Program Memory chip enable (low active)
+    .ram_clk           (mclk),                 // Program Memory clock
+    .ram_din           (pmem_din),             // Program Memory data input
+    .ram_wen           (pmem_wen)              // Program Memory write enable (low active)
 );
 
 
@@ -332,14 +356,14 @@ ram #(`PMEM_MSB, `PMEM_SIZE) pmem_0 (
 ram #(`DMEM_MSB, `DMEM_SIZE) dmem_0 (
 
 // OUTPUTs
-    .ram_dout    (dmem_dout),          // Data Memory data output
+    .ram_dout          (dmem_dout),            // Data Memory data output
 
 // INPUTs
-    .ram_addr    (dmem_addr),          // Data Memory address
-    .ram_cen     (dmem_cen),           // Data Memory chip enable (low active)
-    .ram_clk     (mclk),               // Data Memory clock
-    .ram_din     (dmem_din),           // Data Memory data input
-    .ram_wen     (dmem_wen)            // Data Memory write enable (low active)
+    .ram_addr          (dmem_addr),            // Data Memory address
+    .ram_cen           (dmem_cen),             // Data Memory chip enable (low active)
+    .ram_clk           (mclk),                 // Data Memory clock
+    .ram_din           (dmem_din),             // Data Memory data input
+    .ram_wen           (dmem_wen)              // Data Memory write enable (low active)
 );
 
 
@@ -350,52 +374,61 @@ ram #(`DMEM_MSB, `DMEM_SIZE) dmem_0 (
 openMSP430 dut (
 
 // OUTPUTs
-    .aclk              (aclk),              // ASIC ONLY: ACLK
-    .aclk_en           (aclk_en),           // FPGA ONLY: ACLK enable
-    .dbg_freeze        (dbg_freeze),        // Freeze peripherals
-    .dbg_i2c_sda_out   (dbg_sda_slave_out), // Debug interface: I2C SDA OUT
-    .dbg_uart_txd      (dbg_uart_txd),      // Debug interface: UART TXD
-    .dco_enable        (dco_enable),        // ASIC ONLY: Fast oscillator enable
-    .dco_wkup          (dco_wkup),          // ASIC ONLY: Fast oscillator wake-up (asynchronous)
-    .dmem_addr         (dmem_addr),         // Data Memory address
-    .dmem_cen          (dmem_cen),          // Data Memory chip enable (low active)
-    .dmem_din          (dmem_din),          // Data Memory data input
-    .dmem_wen          (dmem_wen),          // Data Memory write enable (low active)
-    .irq_acc           (irq_acc),           // Interrupt request accepted (one-hot signal)
-    .lfxt_enable       (lfxt_enable),       // ASIC ONLY: Low frequency oscillator enable
-    .lfxt_wkup         (lfxt_wkup),         // ASIC ONLY: Low frequency oscillator wake-up (asynchronous)
-    .mclk              (mclk),              // Main system clock
-    .per_addr          (per_addr),          // Peripheral address
-    .per_din           (per_din),           // Peripheral data input
-    .per_we            (per_we),            // Peripheral write enable (high active)
-    .per_en            (per_en),            // Peripheral enable (high active)
-    .pmem_addr         (pmem_addr),         // Program Memory address
-    .pmem_cen          (pmem_cen),          // Program Memory chip enable (low active)
-    .pmem_din          (pmem_din),          // Program Memory data input (optional)
-    .pmem_wen          (pmem_wen),          // Program Memory write enable (low active) (optional)
-    .puc_rst           (puc_rst),           // Main system reset
-    .smclk             (smclk),             // ASIC ONLY: SMCLK
-    .smclk_en          (smclk_en),          // FPGA ONLY: SMCLK enable
+    .aclk              (aclk),                 // ASIC ONLY: ACLK
+    .aclk_en           (aclk_en),              // FPGA ONLY: ACLK enable
+    .dbg_freeze        (dbg_freeze),           // Freeze peripherals
+    .dbg_i2c_sda_out   (dbg_sda_slave_out),    // Debug interface: I2C SDA OUT
+    .dbg_uart_txd      (dbg_uart_txd),         // Debug interface: UART TXD
+    .dco_enable        (dco_enable),           // ASIC ONLY: Fast oscillator enable
+    .dco_wkup          (dco_wkup),             // ASIC ONLY: Fast oscillator wake-up (asynchronous)
+    .dmem_addr         (dmem_addr),            // Data Memory address
+    .dmem_cen          (dmem_cen),             // Data Memory chip enable (low active)
+    .dmem_din          (dmem_din),             // Data Memory data input
+    .dmem_wen          (dmem_wen),             // Data Memory write byte enable (low active)
+    .irq_acc           (irq_acc),              // Interrupt request accepted (one-hot signal)
+    .lfxt_enable       (lfxt_enable),          // ASIC ONLY: Low frequency oscillator enable
+    .lfxt_wkup         (lfxt_wkup),            // ASIC ONLY: Low frequency oscillator wake-up (asynchronous)
+    .mclk              (mclk),                 // Main system clock
+    .dma_dout          (dma_dout),             // Direct Memory Access data output
+    .dma_ready         (dma_ready),            // Direct Memory Access is complete
+    .dma_resp          (dma_resp),             // Direct Memory Access response (0:Okay / 1:Error)
+    .per_addr          (per_addr),             // Peripheral address
+    .per_din           (per_din),              // Peripheral data input
+    .per_en            (per_en),               // Peripheral enable (high active)
+    .per_we            (per_we),               // Peripheral write byte enable (high active)
+    .pmem_addr         (pmem_addr),            // Program Memory address
+    .pmem_cen          (pmem_cen),             // Program Memory chip enable (low active)
+    .pmem_din          (pmem_din),             // Program Memory data input (optional)
+    .pmem_wen          (pmem_wen),             // Program Memory write byte enable (low active) (optional)
+    .puc_rst           (puc_rst),              // Main system reset
+    .smclk             (smclk),                // ASIC ONLY: SMCLK
+    .smclk_en          (smclk_en),             // FPGA ONLY: SMCLK enable
 
 // INPUTs
-    .cpu_en            (cpu_en),            // Enable CPU code execution (asynchronous)
-    .dbg_en            (dbg_en),            // Debug interface enable (asynchronous)
-    .dbg_i2c_addr      (I2C_ADDR),          // Debug interface: I2C Address
-    .dbg_i2c_broadcast (I2C_BROADCAST),     // Debug interface: I2C Broadcast Address (for multicore systems)
-    .dbg_i2c_scl       (dbg_scl_slave),     // Debug interface: I2C SCL
-    .dbg_i2c_sda_in    (dbg_sda_slave_in),  // Debug interface: I2C SDA IN
-    .dbg_uart_rxd      (dbg_uart_rxd),      // Debug interface: UART RXD (asynchronous)
-    .dco_clk           (dco_clk),           // Fast oscillator (fast clock)
-    .dmem_dout         (dmem_dout),         // Data Memory data output
-    .irq               (irq_in),            // Maskable interrupts
-    .lfxt_clk          (lfxt_clk),          // Low frequency oscillator (typ 32kHz)
-    .nmi               (nmi),               // Non-maskable interrupt (asynchronous)
-    .per_dout          (per_dout),          // Peripheral data output
-    .pmem_dout         (pmem_dout),         // Program Memory data output
-    .reset_n           (reset_n),           // Reset Pin (low active, asynchronous)
-    .scan_enable       (scan_enable),       // ASIC ONLY: Scan enable (active during scan shifting)
-    .scan_mode         (scan_mode),         // ASIC ONLY: Scan mode
-    .wkup              (|wkup_in)           // ASIC ONLY: System Wake-up (asynchronous)
+    .cpu_en            (cpu_en),               // Enable CPU code execution (asynchronous)
+    .dbg_en            (dbg_en),               // Debug interface enable (asynchronous)
+    .dbg_i2c_addr      (I2C_ADDR),             // Debug interface: I2C Address
+    .dbg_i2c_broadcast (I2C_BROADCAST),        // Debug interface: I2C Broadcast Address (for multicore systems)
+    .dbg_i2c_scl       (dbg_scl_slave),        // Debug interface: I2C SCL
+    .dbg_i2c_sda_in    (dbg_sda_slave_in),     // Debug interface: I2C SDA IN
+    .dbg_uart_rxd      (dbg_uart_rxd),         // Debug interface: UART RXD (asynchronous)
+    .dco_clk           (dco_clk),              // Fast oscillator (fast clock)
+    .dmem_dout         (dmem_dout),            // Data Memory data output
+    .irq               (irq_in),               // Maskable interrupts
+    .lfxt_clk          (lfxt_clk),             // Low frequency oscillator (typ 32kHz)
+    .dma_addr          (dma_addr),             // Direct Memory Access address
+    .dma_din           (dma_din),              // Direct Memory Access data input
+    .dma_en            (dma_en),               // Direct Memory Access enable (high active)
+    .dma_priority      (dma_priority),         // Direct Memory Access priority (0:low / 1:high)
+    .dma_we            (dma_we),               // Direct Memory Access write byte enable (high active)
+    .dma_wkup          (dma_wkup),             // ASIC ONLY: DMA Sub-System Wake-up (asynchronous and non-glitchy)
+    .nmi               (nmi),                  // Non-maskable interrupt (asynchronous)
+    .per_dout          (per_dout),             // Peripheral data output
+    .pmem_dout         (pmem_dout),            // Program Memory data output
+    .reset_n           (reset_n),              // Reset Pin (low active, asynchronous)
+    .scan_enable       (scan_enable),          // ASIC ONLY: Scan enable (active during scan shifting)
+    .scan_mode         (scan_mode),            // ASIC ONLY: Scan mode
+    .wkup              (|wkup_in)              // ASIC ONLY: System Wake-up (asynchronous)
 );
 
 //
@@ -419,41 +452,41 @@ omsp_gpio #(.P1_EN(1),
 `endif
 
 // OUTPUTs
-    .irq_port1    (irq_port1),         // Port 1 interrupt
-    .irq_port2    (irq_port2),         // Port 2 interrupt
-    .p1_dout      (p1_dout),           // Port 1 data output
-    .p1_dout_en   (p1_dout_en),        // Port 1 data output enable
-    .p1_sel       (p1_sel),            // Port 1 function select
-    .p2_dout      (p2_dout),           // Port 2 data output
-    .p2_dout_en   (p2_dout_en),        // Port 2 data output enable
-    .p2_sel       (p2_sel),            // Port 2 function select
-    .p3_dout      (p3_dout),           // Port 3 data output
-    .p3_dout_en   (p3_dout_en),        // Port 3 data output enable
-    .p3_sel       (p3_sel),            // Port 3 function select
-    .p4_dout      (p4_dout),           // Port 4 data output
-    .p4_dout_en   (p4_dout_en),        // Port 4 data output enable
-    .p4_sel       (p4_sel),            // Port 4 function select
-    .p5_dout      (p5_dout),           // Port 5 data output
-    .p5_dout_en   (p5_dout_en),        // Port 5 data output enable
-    .p5_sel       (p5_sel),            // Port 5 function select
-    .p6_dout      (p6_dout),           // Port 6 data output
-    .p6_dout_en   (p6_dout_en),        // Port 6 data output enable
-    .p6_sel       (p6_sel),            // Port 6 function select
-    .per_dout     (per_dout_dio),      // Peripheral data output
+    .irq_port1         (irq_port1),            // Port 1 interrupt
+    .irq_port2         (irq_port2),            // Port 2 interrupt
+    .p1_dout           (p1_dout),              // Port 1 data output
+    .p1_dout_en        (p1_dout_en),           // Port 1 data output enable
+    .p1_sel            (p1_sel),               // Port 1 function select
+    .p2_dout           (p2_dout),              // Port 2 data output
+    .p2_dout_en        (p2_dout_en),           // Port 2 data output enable
+    .p2_sel            (p2_sel),               // Port 2 function select
+    .p3_dout           (p3_dout),              // Port 3 data output
+    .p3_dout_en        (p3_dout_en),           // Port 3 data output enable
+    .p3_sel            (p3_sel),               // Port 3 function select
+    .p4_dout           (p4_dout),              // Port 4 data output
+    .p4_dout_en        (p4_dout_en),           // Port 4 data output enable
+    .p4_sel            (p4_sel),               // Port 4 function select
+    .p5_dout           (p5_dout),              // Port 5 data output
+    .p5_dout_en        (p5_dout_en),           // Port 5 data output enable
+    .p5_sel            (p5_sel),               // Port 5 function select
+    .p6_dout           (p6_dout),              // Port 6 data output
+    .p6_dout_en        (p6_dout_en),           // Port 6 data output enable
+    .p6_sel            (p6_sel),               // Port 6 function select
+    .per_dout          (per_dout_dio),         // Peripheral data output
 
 // INPUTs
-    .mclk         (mclk),              // Main system clock
-    .p1_din       (p1_din),            // Port 1 data input
-    .p2_din       (p2_din),            // Port 2 data input
-    .p3_din       (p3_din),            // Port 3 data input
-    .p4_din       (p4_din),            // Port 4 data input
-    .p5_din       (p5_din),            // Port 5 data input
-    .p6_din       (p6_din),            // Port 6 data input
-    .per_addr     (per_addr),          // Peripheral address
-    .per_din      (per_din),           // Peripheral data input
-    .per_en       (per_en),            // Peripheral enable (high active)
-    .per_we       (per_we),            // Peripheral write enable (high active)
-    .puc_rst      (puc_rst)            // Main system reset
+    .mclk              (mclk),                 // Main system clock
+    .p1_din            (p1_din),               // Port 1 data input
+    .p2_din            (p2_din),               // Port 2 data input
+    .p3_din            (p3_din),               // Port 3 data input
+    .p4_din            (p4_din),               // Port 4 data input
+    .p5_din            (p5_din),               // Port 5 data input
+    .p6_din            (p6_din),               // Port 6 data input
+    .per_addr          (per_addr),             // Peripheral address
+    .per_din           (per_din),              // Peripheral data input
+    .per_en            (per_en),               // Peripheral enable (high active)
+    .per_we            (per_we),               // Peripheral write enable (high active)
+    .puc_rst           (puc_rst)               // Main system reset
 );
 
 //
@@ -463,37 +496,36 @@ omsp_gpio #(.P1_EN(1),
 omsp_timerA timerA_0 (
 
 // OUTPUTs
-    .irq_ta0      (irq_ta0),           // Timer A interrupt: TACCR0
-    .irq_ta1      (irq_ta1),           // Timer A interrupt: TAIV, TACCR1, TACCR2
-    .per_dout     (per_dout_timerA),   // Peripheral data output
-    .ta_out0      (ta_out0),           // Timer A output 0
-    .ta_out0_en   (ta_out0_en),        // Timer A output 0 enable
-    .ta_out1      (ta_out1),           // Timer A output 1
-    .ta_out1_en   (ta_out1_en),        // Timer A output 1 enable
-    .ta_out2      (ta_out2),           // Timer A output 2
-    .ta_out2_en   (ta_out2_en),        // Timer A output 2 enable
+    .irq_ta0           (irq_ta0),              // Timer A interrupt: TACCR0
+    .irq_ta1           (irq_ta1),              // Timer A interrupt: TAIV, TACCR1, TACCR2
+    .per_dout          (per_dout_timerA),      // Peripheral data output
+    .ta_out0           (ta_out0),              // Timer A output 0
+    .ta_out0_en        (ta_out0_en),           // Timer A output 0 enable
+    .ta_out1           (ta_out1),              // Timer A output 1
+    .ta_out1_en        (ta_out1_en),           // Timer A output 1 enable
+    .ta_out2           (ta_out2),              // Timer A output 2
+    .ta_out2_en        (ta_out2_en),           // Timer A output 2 enable
 
 // INPUTs
-    .aclk_en      (aclk_en),           // ACLK enable (from CPU)
-    .dbg_freeze   (dbg_freeze),        // Freeze Timer A counter
-    .inclk        (inclk),             // INCLK external timer clock (SLOW)
-    .irq_ta0_acc  (irq_acc[`IRQ_NR-7]),// Interrupt request TACCR0 accepted
-    .mclk         (mclk),              // Main system clock
-    .per_addr     (per_addr),          // Peripheral address
-    .per_din      (per_din),           // Peripheral data input
-    .per_en       (per_en),            // Peripheral enable (high active)
-    .per_we       (per_we),            // Peripheral write enable (high active)
-    .puc_rst      (puc_rst),           // Main system reset
-    .smclk_en     (smclk_en),          // SMCLK enable (from CPU)
-    .ta_cci0a     (ta_cci0a),          // Timer A compare 0 input A
-    .ta_cci0b     (ta_cci0b),          // Timer A compare 0 input B
-    .ta_cci1a     (ta_cci1a),          // Timer A compare 1 input A
-    .ta_cci1b     (ta_cci1b),          // Timer A compare 1 input B
-    .ta_cci2a     (ta_cci2a),          // Timer A compare 2 input A
-    .ta_cci2b     (ta_cci2b),          // Timer A compare 2 input B
-    .taclk        (taclk)              // TACLK external timer clock (SLOW)
+    .aclk_en           (aclk_en),              // ACLK enable (from CPU)
+    .dbg_freeze        (dbg_freeze),           // Freeze Timer A counter
+    .inclk             (inclk),                // INCLK external timer clock (SLOW)
+    .irq_ta0_acc       (irq_acc[`IRQ_NR-7]),   // Interrupt request TACCR0 accepted
+    .mclk              (mclk),                 // Main system clock
+    .per_addr          (per_addr),             // Peripheral address
+    .per_din           (per_din),              // Peripheral data input
+    .per_en            (per_en),               // Peripheral enable (high active)
+    .per_we            (per_we),               // Peripheral write enable (high active)
+    .puc_rst           (puc_rst),              // Main system reset
+    .smclk_en          (smclk_en),             // SMCLK enable (from CPU)
+    .ta_cci0a          (ta_cci0a),             // Timer A compare 0 input A
+    .ta_cci0b          (ta_cci0b),             // Timer A compare 0 input B
+    .ta_cci1a          (ta_cci1a),             // Timer A compare 1 input A
+    .ta_cci1b          (ta_cci1b),             // Timer A compare 1 input B
+    .ta_cci2a          (ta_cci2a),             // Timer A compare 2 input A
+    .ta_cci2b          (ta_cci2b),             // Timer A compare 2 input B
+    .taclk             (taclk)                 // TACLK external timer clock (SLOW)
 );
-
 
 //
 // Peripheral templates
@@ -502,32 +534,32 @@ omsp_timerA timerA_0 (
 template_periph_8b template_periph_8b_0 (
 
 // OUTPUTs
-    .per_dout     (per_dout_temp_8b),  // Peripheral data output
+    .per_dout          (per_dout_temp_8b),     // Peripheral data output
 
 // INPUTs
-    .mclk         (mclk),              // Main system clock
-    .per_addr     (per_addr),          // Peripheral address
-    .per_din      (per_din),           // Peripheral data input
-    .per_en       (per_en),            // Peripheral enable (high active)
-    .per_we       (per_we),            // Peripheral write enable (high active)
-    .puc_rst      (puc_rst)            // Main system reset
+    .mclk              (mclk),                 // Main system clock
+    .per_addr          (per_addr),             // Peripheral address
+    .per_din           (per_din),              // Peripheral data input
+    .per_en            (per_en),               // Peripheral enable (high active)
+    .per_we            (per_we),               // Peripheral write enable (high active)
+    .puc_rst           (puc_rst)               // Main system reset
 );
 
 `ifdef CVER
-template_periph_16b #(15'h0190)             template_periph_16b_0 (
+template_periph_16b #(15'h0190)                                        template_periph_16b_0 (
 `else
 template_periph_16b #(.BASE_ADDR((15'd`PER_SIZE-15'h0070) & 15'h7ff8)) template_periph_16b_0 (
 `endif
 // OUTPUTs
-    .per_dout     (per_dout_temp_16b), // Peripheral data output
+    .per_dout          (per_dout_temp_16b),    // Peripheral data output
 
 // INPUTs
-    .mclk         (mclk),              // Main system clock
-    .per_addr     (per_addr),          // Peripheral address
-    .per_din      (per_din),           // Peripheral data input
-    .per_en       (per_en),            // Peripheral enable (high active)
-    .per_we       (per_we),            // Peripheral write enable (high active)
-    .puc_rst      (puc_rst)            // Main system reset
+    .mclk              (mclk),                 // Main system clock
+    .per_addr          (per_addr),             // Peripheral address
+    .per_din           (per_din),              // Peripheral data input
+    .per_en            (per_en),               // Peripheral enable (high active)
+    .per_we            (per_we),               // Peripheral write enable (high active)
+    .puc_rst           (puc_rst)               // Main system reset
 );
 
 
@@ -588,33 +620,33 @@ pullup dbg_sda_inst (dbg_sda);
 // I2C Slave (openMSP430)
 //.........................
 io_cell scl_slave_inst (
-  .pad         (dbg_scl),             // I/O pad
-  .data_in     (dbg_scl_slave),       // Input
-  .data_out_en (1'b0),                // Output enable
-  .data_out    (1'b0)                 // Output
+    .pad               (dbg_scl),              // I/O pad
+    .data_in           (dbg_scl_slave),        // Input
+    .data_out_en       (1'b0),                 // Output enable
+    .data_out          (1'b0)                  // Output
 );
 
 io_cell sda_slave_inst (
-  .pad         (dbg_sda),             // I/O pad
-  .data_in     (dbg_sda_slave_in),    // Input
-  .data_out_en (!dbg_sda_slave_out),  // Output enable
-  .data_out    (1'b0)                 // Output
+    .pad               (dbg_sda),              // I/O pad
+    .data_in           (dbg_sda_slave_in),     // Input
+    .data_out_en       (!dbg_sda_slave_out),   // Output enable
+    .data_out          (1'b0)                  // Output
 );
 
 // I2C Master (Debugger)
 //.........................
 io_cell scl_master_inst (
-  .pad         (dbg_scl),             // I/O pad
-  .data_in     (),                    // Input
-  .data_out_en (!dbg_scl_master),     // Output enable
-  .data_out    (1'b0)                 // Output
+    .pad               (dbg_scl),              // I/O pad
+    .data_in           (),                     // Input
+    .data_out_en       (!dbg_scl_master),      // Output enable
+    .data_out          (1'b0)                  // Output
 );
 
 io_cell sda_master_inst (
-  .pad         (dbg_sda),             // I/O pad
-  .data_in     (dbg_sda_master_in),   // Input
-  .data_out_en (!dbg_sda_master_out), // Output enable
-  .data_out    (1'b0)                 // Output
+    .pad               (dbg_sda),              // I/O pad
+    .data_in           (dbg_sda_master_in),    // Input
+    .data_out_en       (!dbg_sda_master_out),  // Output enable
+    .data_out          (1'b0)                  // Output
 );
 
 
@@ -624,17 +656,17 @@ io_cell sda_master_inst (
 msp_debug msp_debug_0 (
 
 // OUTPUTs
-    .e_state      (e_state),           // Execution state
-    .i_state      (i_state),           // Instruction fetch state
-    .inst_cycle   (inst_cycle),        // Cycle number within current instruction
-    .inst_full    (inst_full),         // Currently executed instruction (full version)
-    .inst_number  (inst_number),       // Instruction number since last system reset
-    .inst_pc      (inst_pc),           // Instruction Program counter
-    .inst_short   (inst_short),        // Currently executed instruction (short version)
+    .e_state           (e_state),              // Execution state
+    .i_state           (i_state),              // Instruction fetch state
+    .inst_cycle        (inst_cycle),           // Cycle number within current instruction
+    .inst_full         (inst_full),            // Currently executed instruction (full version)
+    .inst_number       (inst_number),          // Instruction number since last system reset
+    .inst_pc           (inst_pc),              // Instruction Program counter
+    .inst_short        (inst_short),           // Currently executed instruction (short version)
 
 // INPUTs
-    .mclk         (mclk),              // Main system clock
-    .puc_rst      (puc_rst)            // Main system reset
+    .mclk              (mclk),                 // Main system clock
+    .puc_rst           (puc_rst)               // Main system reset
 );
 
 
@@ -681,6 +713,8 @@ initial // Timeout
        $display("|               SIMULATION FAILED               |");
        $display("|              (simulation Timeout)             |");
        $display(" ===============================================");
+       $display("");
+       tb_extra_report;
        $finish;
    `endif
   end
@@ -691,7 +725,12 @@ initial // Normal end of test
      wait(inst_pc=='hffff);
 
      $display(" ===============================================");
-     if (error!=0)
+     if ((dma_rd_error!=0) || (dma_wr_error!=0))
+       begin
+          $display("|               SIMULATION FAILED               |");
+          $display("|           (some DMA transfer failed)          |");
+       end
+     else if (error!=0)
        begin
           $display("|               SIMULATION FAILED               |");
           $display("|     (some verilog stimulus checks failed)     |");
@@ -706,6 +745,8 @@ initial // Normal end of test
           $display("|               SIMULATION PASSED               |");
        end
      $display(" ===============================================");
+     $display("");
+     tb_extra_report;
      $finish;
   end
 
@@ -722,5 +763,32 @@ initial // Normal end of test
       end
    endtask
 
+   task tb_extra_report;
+      begin
+         $display("DMA REPORT: Total Accesses: %-d Total RD: %-d Total WR: %-d", dma_cnt_rd+dma_cnt_wr,     dma_cnt_rd,   dma_cnt_wr);
+         $display("            Total Errors:   %-d Error RD: %-d Error WR: %-d", dma_rd_error+dma_wr_error, dma_rd_error, dma_wr_error);
+         if (!((`PMEM_SIZE>=4092) && (`DMEM_SIZE>=1024)))
+           begin
+	      $display("");
+              $display("Note: DMA if verification disabled (PMEM must be 4kB or bigger, DMEM must be 1kB or bigger)");
+           end
+         $display("");
+         $display("SIMULATION SEED: %d", `SEED);
+         $display("");
+      end
+   endtask
+
+   task tb_skip_finish;
+      input [65*8-1:0] skip_string;
+      begin
+         $display(" ===============================================");
+         $display("|               SIMULATION SKIPPED              |");
+         $display("%s", skip_string);
+         $display(" ===============================================");
+         $display("");
+         tb_extra_report;
+         $finish;
+      end
+   endtask
 
 endmodule

@@ -34,17 +34,47 @@
 /* $LastChangedDate: 2009-08-04 23:47:15 +0200 (Tue, 04 Aug 2009) $          */
 /*===========================================================================*/
 
+`define LONG_TIMEOUT
+
+integer wait_wr;
+integer wait_rd;
 
 initial
    begin
       $display(" ===============================================");
       $display("|                 START SIMULATION              |");
       $display(" ===============================================");
+
       repeat(5) @(posedge mclk);
+
       stimulus_done = 0;
 
- 
-     
+      wait_wr       = 0;
+      wait_rd       = 0;
+
+      repeat(50) @(posedge mclk);
+if (0)
+  begin
+      dma_write_16b(16'hF900, 16'h1234);
+      repeat(wait_wr) @(posedge mclk);
+      dma_write_16b(16'hF902, 16'h5678);
+      repeat(wait_wr) @(posedge mclk);
+      dma_write_16b(16'hF904, 16'h9ABC);
+      repeat(wait_wr) @(posedge mclk);
+      dma_write_16b(16'hF906, 16'hDEF0);
+
+      repeat(10) @(posedge mclk);
+
+      dma_read_16b(16'hF900, 16'h1234);
+      repeat(wait_rd) @(posedge mclk);
+      dma_read_16b(16'hF902, 16'h5678);
+      repeat(wait_rd) @(posedge mclk);
+      dma_read_16b(16'hF904, 16'h9ABC);
+      repeat(wait_rd) @(posedge mclk);
+      dma_read_16b(16'hF906, 16'hDEF0);
+  end
+
+      repeat(50) @(posedge mclk);
+
       stimulus_done = 1;
    end
-
