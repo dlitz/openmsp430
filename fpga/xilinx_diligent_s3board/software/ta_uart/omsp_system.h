@@ -181,6 +181,7 @@
 // Alternate register names
 #define CCTL0        TACCTL0
 #define CCTL1        TACCTL1
+#define CCTL2        TACCTL2
 #define CCR0         TACCR0
 #define CCR1         TACCR1
 

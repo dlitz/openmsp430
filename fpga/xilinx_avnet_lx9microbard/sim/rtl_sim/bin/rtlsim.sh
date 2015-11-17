@@ -22,17 +22,17 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #------------------------------------------------------------------------------
-# 
+#
 # File Name: rtlsim.sh
-# 
+#
 # Author(s):
 #             - Olivier Girard,    olgirard@gmail.com
 #             - Mihai M.,	   mmihai@delajii.net
 #
 #------------------------------------------------------------------------------
-# $Rev: 138 $
+# $Rev: 73 $
 # $LastChangedBy: olivier.girard $
-# $LastChangedDate: 2012-04-23 13:10:00 +0200 (Mon, 23 Apr 2012) $
+# $LastChangedDate: 2010-08-03 12:26:39 -0700 (Tue, 03 Aug 2010) $
 #------------------------------------------------------------------------------
 
 ###############################################################################
@@ -73,7 +73,7 @@ fi
 if [ "${OMSP_SIMULATOR:-iverilog}" = iverilog ]; then
 
     rm -rf simv
-    
+
     NODUMP=${OMSP_NODUMP-0}
     if [ $NODUMP -eq 1 ]
       then
@@ -81,8 +81,8 @@ if [ "${OMSP_SIMULATOR:-iverilog}" = iverilog ]; then
       else
         iverilog -o simv -c $3
     fi
-    
-    if [ `uname -o` = "Cygwin" ]
+
+    if [[ $(uname -s) == CYGWIN* ]];
       then
 	    vvp.exe ./simv
       else
@@ -98,14 +98,15 @@ else
        vargs=""
     fi
 
-   case $OMSP_SIMULATOR in 
-    cver* ) 
+   case $OMSP_SIMULATOR in
+    cver* )
        vargs="$vargs +define+VXL +define+CVER" ;;
     verilog* )
        vargs="$vargs +define+VXL" ;;
     ncverilog* )
        rm -rf INCA_libs
-       vargs="$vargs +access+r +nclicq +ncinput+../bin/cov_ncverilog.tcl -covdut openMSP430 -covfile ../bin/cov_ncverilog.ccf -coverage all +define+TRN_FILE" ;;
+       #vargs="$vargs +access+r +nclicq +ncinput+../bin/cov_ncverilog.tcl -covdut openMSP430 -covfile ../bin/cov_ncverilog.ccf -coverage all +define+TRN_FILE" ;;
+       vargs="$vargs +access+r  +nclicq +define+TRN_FILE" ;;
     vcs* )
        rm -rf csrc simv*
        vargs="$vargs -R -debug_pp +vcs+lic+wait +v2k +define+VPD_FILE" ;;
@@ -117,12 +118,12 @@ else
     isim )
        # Xilinx simulator
        rm -rf fuse* isim*
-       fuse tb_openMSP430_fpga glbl -mt off -v 1 -prj $3 -o isim.exe -i ../../../bench/verilog/ -i ../../../rtl/verilog/openmsp430/ -i ../../../rtl/verilog/openmsp430/periph/
+       fuse tb_openMSP430 -prj $3 -o isim.exe -i ../../../bench/verilog/ -i ../../../rtl/verilog/ -i ../../../rtl/verilog/periph/
        echo "run all" > isim.tcl
        ./isim.exe -tclbatch isim.tcl
        exit
    esac
-   
+
    echo "Running: $OMSP_SIMULATOR -f $3 $vargs"
    exec $OMSP_SIMULATOR -f $3 $vargs
 fi
