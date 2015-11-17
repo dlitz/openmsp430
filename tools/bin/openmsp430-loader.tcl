@@ -22,7 +22,7 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #
 #------------------------------------------------------------------------------
-# 
+#
 # File Name: openmsp430-loader.tcl
 #
 # Author(s):
@@ -36,6 +36,18 @@
 
 global omsp_conf
 global omsp_info
+
+# Detect toolchain
+if {[catch {exec msp430-gcc --version} debug_info]} {
+    if {[catch {exec msp430-elf-gcc --version} debug_info]} {
+	puts "\nERROR: Could not detect MSP430 GCC toolchain"
+	exit 1
+    } else {
+	set TOOLCHAIN_PFX "msp430-elf"
+    }
+} else {
+    set TOOLCHAIN_PFX "msp430"
+}
 
 ###############################################################################
 #                            SOURCE LIBRARIES                                 #
@@ -98,14 +110,14 @@ for {set i 0} {$i < $argc} {incr i} {
 if {[string eq $elf_file -1]} {
     puts "\nERROR: ELF/IHEX file isn't specified"
     help
-    exit 1   
+    exit 1
 }
 
 # Make sure the elf file exists
 if {![file exists $elf_file]} {
     puts "\nERROR: Specified ELF/IHEX file doesn't exist"
     help
-    exit 1   
+    exit 1
 }
 
 # Make sure the selected adptor is valid
@@ -113,21 +125,21 @@ if {![string eq $omsp_conf(interface) "uart_generic"] &
     ![string eq $omsp_conf(interface) "i2c_usb-iss"]} {
     puts "\nERROR: Specified adaptor is not valid (should be \"uart_generic\" or \"i2c_usb-iss\")"
     help
-    exit 1   
+    exit 1
 }
 
 # Make sure the I2C address is an integer
 if {![string is integer $omsp_conf(0,cpuaddr)]} {
     puts "\nERROR: Specified I2C address is not an integer"
     help
-    exit 1   
+    exit 1
 }
 
 # Make sure the I2C address is valid
 if {($omsp_conf(0,cpuaddr)<8) | ($omsp_conf(0,cpuaddr)>119)} {
     puts "\nERROR: Specified I2C address should lay between 7 and 120"
     help
-    exit 1   
+    exit 1
 }
 
 # If the selected interface is a UART, make sure the selected speed is an integer
@@ -135,7 +147,7 @@ if {[string eq $omsp_conf(interface) "uart_generic"]} {
     if {![string is integer $omsp_conf(baudrate)]} {
         puts "\nERROR: Specified UART communication speed is not an integer"
         help
-        exit 1   
+        exit 1
     }
 } elseif {[string eq $omsp_conf(interface) "i2c_usb-iss"]} {
     if {[lsearch [lindex [GetAllowedSpeeds] 2] $omsp_conf(baudrate)]==-1} {
@@ -145,7 +157,7 @@ if {[string eq $omsp_conf(interface) "uart_generic"]} {
             puts "                              - $allowedVal"
         }
         puts ""
-        exit 1   
+        exit 1
     }
 }
 
@@ -170,7 +182,7 @@ if {[string eq $fileType "elf"]} {
 }
 
 # Generate binary file
-if {[catch {exec msp430-objcopy -I $fileType -O binary $elf_file $bin_file} errMsg]} {
+if {[catch {exec ${TOOLCHAIN_PFX}-objcopy -I $fileType -O binary $elf_file $bin_file} errMsg]} {
     puts $errMsg
     exit 1
 }
@@ -184,7 +196,7 @@ for {set i 0} {$i <= $timeout} {incr i} {
     }
 }
 if {$i>=$timeout} {
-    puts "\nTimeout: ELF to BIN file conversion problem with \"msp430-objcopy\" executable"
+    puts "\nTimeout: ELF to BIN file conversion problem with \"${TOOLCHAIN_PFX}-objcopy\" executable"
     puts "$errMsg"
     exit 1
 }
@@ -244,6 +256,7 @@ puts ""
 # Make sure ELF program size is the same as the available program memory
 if {[lindex $sizes 0] != [expr $hex_size/2]} {
     puts "ERROR: ELF program size ($byte_size B) is different than the available program memory ([lindex $sizes 0] B)"
+    utils::uart_close
     exit 1
 }
 
@@ -262,6 +275,7 @@ if {[VerifyMem 0 $StartAddr $DataArray 1]} {
     puts "done"
 } else {
     puts "ERROR"
+    utils::uart_close
     exit 1
 }
 
