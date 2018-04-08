@@ -1,3 +1,8 @@
+2018-04-08 [r227]  
+
+	* Fix Software development tools issue preventing COM port
+	  connections on Windows 10.
+
 2016-08-01 [r217]  
 
 	* Update openmsp430-gdb-proxy tool to fix Get Register procedure
