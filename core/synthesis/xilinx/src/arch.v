@@ -1,3 +1,0 @@
-
-`define SPARTAN3
-

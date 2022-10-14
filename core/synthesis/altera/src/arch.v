@@ -1,3 +1,0 @@
-
-`define CYCLONE_II
-
